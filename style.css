@@ -3,37 +3,170 @@
     --side: #070e1a;
     --gold: #c5a059;
     --text: #e6f1ff;
+    --red: #ff4d4d;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
 body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
 
-/* --- CORRECTIF AFFICHAGE ONGLETS --- */
+/* --- SYSTÈME D'ONGLETS --- */
 .tab-pane {
-    display: none !important; /* Cache tout par défaut */
+    display: none !important;
 }
 
 .tab-pane.active {
-    display: block !important; /* Affiche uniquement l'actif */
+    display: block !important;
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; } to { opacity: 1; }
 }
 
 .hidden { display: none !important; }
 
-/* --- MISE EN PAGE --- */
+/* --- LAYOUT --- */
 .app-container { display: flex; height: 100vh; }
-.sidebar { width: 300px; background: var(--side); border-right: 1px solid rgba(197,160,89,0.3); padding: 25px; display: flex; flex-direction: column; }
-.content-area { flex: 1; padding: 40px; overflow-y: auto; }
 
-.agent-profile { display: flex; align-items: center; gap: 10px; padding: 15px; background: rgba(255,255,255,0.03); border-radius: 4px; margin-bottom: 20px; }
-#user-avatar { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--gold); }
+.sidebar { 
+    width: 300px; 
+    background: var(--side); 
+    border-right: 1px solid rgba(197, 160, 89, 0.3); 
+    padding: 25px; 
+    display: flex; 
+    flex-direction: column; 
+}
 
-.nav-link { width: 100%; background: none; border: none; color: #8892b0; padding: 12px; text-align: left; cursor: pointer; }
-.nav-link.active { color: var(--gold); border-left: 3px solid var(--gold); background: rgba(197,160,89,0.1); }
+.content-area { 
+    flex: 1; 
+    padding: 40px; 
+    overflow-y: auto; 
+    background: radial-gradient(circle at center, #0a1422 0%, #050a12 100%);
+}
 
-.auth-overlay { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; }
-.lock-card { text-align: center; border: 1px solid var(--gold); padding: 40px; background: rgba(0,0,0,0.5); }
-.discord-btn { background: #5865F2; color: white; border: none; padding: 12px 24px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 20px; }
+.agent-profile { 
+    display: flex; 
+    align-items: center; 
+    gap: 12px; 
+    padding: 15px; 
+    background: rgba(255, 255, 255, 0.03); 
+    border-radius: 4px; 
+    margin-bottom: 30px;
+    border: 1px solid rgba(197, 160, 89, 0.1);
+}
 
-.glass-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 20px; }
-input, select, textarea { width: 100%; padding: 12px; background: #000; border: 1px solid #333; color: #fff; margin-bottom: 10px; }
-.btn-primary { background: var(--gold); color: #000; border: none; padding: 10px 20px; font-weight: bold; cursor: pointer; }
+#user-avatar { 
+    width: 45px; 
+    height: 45px; 
+    border-radius: 50%; 
+    border: 2px solid var(--gold);
+    object-fit: cover;
+}
+
+#user-tag { font-weight: bold; font-size: 0.9rem; color: var(--gold); }
+
+.logout-link { 
+    background: none; 
+    border: none; 
+    color: var(--red); 
+    font-size: 0.7rem; 
+    cursor: pointer; 
+    text-decoration: underline; 
+    display: block;
+    margin-top: 4px;
+}
+
+.nav-title {
+    font-size: 0.7rem;
+    color: var(--gold);
+    opacity: 0.5;
+    margin: 20px 0 10px 5px;
+    letter-spacing: 1px;
+}
+
+.nav-link { 
+    width: 100%; 
+    background: none; 
+    border: none; 
+    color: #8892b0; 
+    padding: 12px; 
+    text-align: left; 
+    cursor: pointer; 
+    transition: 0.2s;
+    border-radius: 4px;
+}
+
+.nav-link:hover { background: rgba(255,255,255,0.05); }
+
+.nav-link.active { 
+    color: var(--gold); 
+    border-left: 3px solid var(--gold); 
+    background: rgba(197, 160, 89, 0.1); 
+}
+
+/* --- COMPOSANTS --- */
+.auth-overlay { 
+    position: fixed; 
+    inset: 0; 
+    background: var(--bg); 
+    z-index: 9999; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+}
+
+.lock-card { 
+    text-align: center; 
+    border: 1px solid var(--gold); 
+    padding: 50px; 
+    background: rgba(0, 0, 0, 0.8);
+    box-shadow: 0 0 30px rgba(0,0,0,0.5);
+}
+
+.discord-btn { 
+    background: #5865F2; 
+    color: white; 
+    border: none; 
+    padding: 14px 28px; 
+    border-radius: 4px; 
+    cursor: pointer; 
+    font-weight: bold; 
+    margin-top: 25px;
+    transition: 0.3s;
+}
+
+.discord-btn:hover { background: #4752c4; transform: translateY(-2px); }
+
+.glass-card { 
+    background: rgba(255, 255, 255, 0.02); 
+    border: 1px solid rgba(255, 255, 255, 0.08); 
+    padding: 25px; 
+    border-radius: 4px;
+}
+
+input, select, textarea { 
+    width: 100%; 
+    padding: 14px; 
+    background: rgba(0,0,0,0.4); 
+    border: 1px solid #333; 
+    color: #fff; 
+    margin-bottom: 15px;
+    outline: none;
+}
+
+input:focus { border-color: var(--gold); }
+
+.btn-primary { 
+    background: var(--gold); 
+    color: #000; 
+    border: none; 
+    padding: 12px 25px; 
+    font-weight: bold; 
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-primary:hover { filter: brightness(1.2); }
+.btn-primary.full { width: 100%; }
+
+#clock { font-family: 'Courier New', Courier, monospace; font-size: 1.5rem; color: var(--gold); margin-top: auto; padding-top: 20px; }
