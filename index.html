@@ -3,148 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FBI | Sensity Federal System</title>
+    <title>FBI | Sensity Terminal</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="scanline"></div>
     <div class="noise"></div>
 
-    <!-- ECRAN DE VERROUILLAGE -->
     <div id="auth-lock" class="auth-overlay">
         <div class="lock-card">
             <img src="assets/fbi_logo.png" alt="FBI" class="fbi-seal-auth">
             <h2>CENTRAL INTELLIGENCE</h2>
-            <p>Accès restreint - District de Sensity</p>
-            <button class="discord-btn" onclick="redirectToDiscord()">AUTHENTIFICATION DISCORD</button>
+            <p>DISTRICT DE SENSITY</p>
+            <button class="discord-btn-auth" onclick="redirectToDiscord()">CONNEXION DISCORD</button>
         </div>
     </div>
 
-    <!-- TERMINAL PRINCIPAL -->
-    <div class="app-container blur" id="main-app">
-        
-        <!-- BARRE LATERALE -->
+    <div class="app-wrapper blur" id="main-app">
         <aside class="sidebar">
-            <div class="brand">
-                <img src="assets/fbi_logo.png" alt="Logo">
-                <div class="brand-text">
-                    <h1>FBI</h1>
-                    <span>SENSITY UNIT</span>
+            <div class="sidebar-top">
+                <div class="fbi-header">
+                    <img src="assets/fbi_logo.png" alt="Logo" class="main-logo">
+                    <div class="header-titles">
+                        <h1>FEDERAL BUREAU</h1>
+                        <span>SENSITY UNIT</span>
+                    </div>
                 </div>
+
+                <div class="user-profile">
+                    <img id="user-avatar" src="" alt="">
+                    <div class="user-info">
+                        <p id="user-tag">AGENT</p>
+                        <button onclick="logout()" class="logout-link">DÉCONNEXION</button>
+                    </div>
+                </div>
+
+                <nav class="nav-menu">
+                    <span class="nav-label">ARCHIVES</span>
+                    <button class="nav-item active" data-tab="search-tab">🔍 RECHERCHE</button>
+                    <button class="nav-item" data-tab="create-tab">📂 NOUVEAU DOSSIER</button>
+                    
+                    <span class="nav-label">OPÉRATIONS</span>
+                    <button class="nav-item" data-tab="units-tab">👤 UNITÉS ACTIVES</button>
+                    
+                    <div id="admin-nav-section" style="display:none;">
+                        <span class="nav-label">COMMANDEMENT</span>
+                        <button class="nav-item admin-link" data-tab="admin-tab">⚙️ PANEL ADMIN</button>
+                    </div>
+                </nav>
             </div>
-
-            <div class="agent-profile">
-                <img id="user-avatar" src="" alt="">
-                <div class="agent-name">
-                    <span id="user-tag">NOM_AGENT</span>
-                    <button onclick="logout()">DÉCONNEXION</button>
-                </div>
-            </div>
-
-            <nav class="sidebar-nav">
-                <p class="nav-title">BASE DE DONNÉES</p>
-                <button class="nav-link active" data-tab="tab-search">🔍 RECHERCHE</button>
-                <button class="nav-link" data-tab="tab-create">📂 NOUVEAU DOSSIER</button>
-                
-                <p class="nav-title">OPÉRATIONS</p>
-                <button class="nav-link" data-tab="tab-units">👤 UNITÉS ACTIVES</button>
-                
-                <div id="admin-only" style="display:none;">
-                    <p class="nav-title">HAUT-COMMANDEMENT</p>
-                    <button class="nav-link admin-btn" data-tab="tab-admin">⚙️ PANEL ADMIN</button>
-                </div>
-            </nav>
-
-            <div class="sidebar-footer">
+            <div class="sidebar-bottom">
                 <div id="clock">00:00:00</div>
-                <div class="status-indicator">DÉCRYPTAGE ACTIF</div>
             </div>
         </aside>
 
-        <!-- ZONE DE CONTENU DYNAMIQUE -->
-        <main class="content-area">
-            
-            <!-- SECTION 1 : RECHERCHE -->
-            <section id="tab-search" class="tab-content active">
-                <div class="page-header">
-                    <h2>RECHERCHE CRIMINELLE</h2>
-                    <p>Interrogation de la base de données centrale.</p>
+        <main class="main-content">
+            <section id="search-tab" class="tab-pane active">
+                <h2 class="section-title">CONSULTATION DES ARCHIVES</h2>
+                <div class="search-container">
+                    <div class="search-bar">
+                        <input type="text" id="search-input" placeholder="Saisir un nom...">
+                        <button class="btn-primary" onclick="searchCitizen()">INTERROGER</button>
+                    </div>
+                    <div id="search-result"></div>
                 </div>
-                <div class="search-box">
-                    <input type="text" id="search-input" placeholder="Saisir le nom d'un citoyen...">
-                    <button onclick="searchCitizen()">INTERROGER</button>
-                </div>
-                <div id="search-result"></div>
             </section>
 
-            <!-- SECTION 2 : CRÉATION -->
-            <section id="tab-create" class="tab-content">
-                <div class="page-header">
-                    <h2>CRÉATION DE DOSSIER</h2>
-                    <p>Enregistrement d'un nouvel individu ou d'un rapport.</p>
-                </div>
-                <div class="fbi-form">
-                    <div class="input-group">
-                        <input type="text" id="target-name" placeholder="Nom Complet">
-                        <select id="target-status">
+            <section id="create-tab" class="tab-pane">
+                <h2 class="section-title">ENREGISTREMENT JUDICIAIRE</h2>
+                <div class="glass-card">
+                    <div class="form-row">
+                        <input type="text" id="report-title" placeholder="Nom du citoyen / Sujet">
+                        <select id="report-status">
                             <option value="LIBRE">🟢 LIBRE</option>
                             <option value="SURVEILLANCE">🟡 SURVEILLANCE</option>
                             <option value="RECHERCHÉ">🔴 RECHERCHÉ</option>
                         </select>
                     </div>
-                    <textarea id="target-details" placeholder="Antécédents, faits reprochés, description physique..." rows="12"></textarea>
-                    <button class="save-btn" onclick="saveCitizen()">ARCHIVER LE DOSSIER</button>
+                    <textarea id="report-content" placeholder="Détails du dossier..." rows="10"></textarea>
+                    <button class="btn-primary" style="width:100%" onclick="submitFullReport()">TRANSMETTRE & ARCHIVER</button>
                 </div>
             </section>
 
-            <!-- SECTION 3 : UNITÉS -->
-            <section id="tab-units" class="tab-content">
-                <div class="page-header">
-                    <h2>UNITÉS SUR LE TERRAIN</h2>
-                    <p>Liste des agents actuellement en service.</p>
-                </div>
-                <div id="units-list" class="units-grid"></div>
+            <section id="units-tab" class="tab-pane">
+                <h2 class="section-title">UNITÉS ACTIVES SUR LE TERRAIN</h2>
+                <div id="public-agents-list" class="grid-list"></div>
             </section>
 
-            <!-- SECTION 4 : ADMIN -->
-            <section id="tab-admin" class="tab-content">
-                <div class="page-header">
-                    <h2>PANEL DE GESTION</h2>
-                    <p>Contrôle des effectifs et des rapports archivés.</p>
-                </div>
-                <div class="admin-layout">
-                    <div class="admin-card">
-                        <h3>AFFECTATION D'AGENT</h3>
-                        <div class="input-row">
-                            <input type="text" id="adm-name" placeholder="Nom">
-                            <input type="text" id="adm-badge" placeholder="Badge">
-                            <button onclick="addAgent()">AFFECTER</button>
+            <section id="admin-tab" class="tab-pane">
+                <h2 class="section-title">PANEL DE COMMANDEMENT</h2>
+                <div class="admin-grid">
+                    <div class="glass-card">
+                        <h3>GESTION DES EFFECTIFS</h3>
+                        <div class="form-row">
+                            <input type="text" id="adm-name" placeholder="Nom Agent">
+                            <input type="text" id="adm-badge" placeholder="Matricule">
+                            <button class="btn-primary" onclick="addAgent()">AFFECTER</button>
                         </div>
-                        <div id="admin-agents-list" class="list-container"></div>
+                        <div id="admin-agents-list" class="scroll-list"></div>
                     </div>
-                    <div class="admin-card">
-                        <h3>ARCHIVES DES RAPPORTS</h3>
-                        <div id="admin-reports-list" class="list-container"></div>
+                    <div class="glass-card">
+                        <h3>FLUX DES RAPPORTS REÇUS</h3>
+                        <div id="admin-reports-list" class="scroll-list"></div>
                     </div>
                 </div>
             </section>
-
         </main>
     </div>
 
-    <!-- MODAL POUR LES DOSSIERS -->
-    <div id="report-modal" class="modal hidden">
-        <div class="paper">
-            <div class="paper-header">
-                <img src="assets/fbi_logo.png" alt="FBI">
-                <div>
-                    <h2 id="m-title">TITRE</h2>
-                    <p id="m-meta">META</p>
-                </div>
-            </div>
-            <hr>
-            <div id="m-content" class="paper-body"></div>
-            <button class="close-btn" onclick="closeModal()">FERMER</button>
+    <div id="report-modal" class="modal-overlay hidden">
+        <div class="document-paper">
+            <h2 id="modal-title"></h2>
+            <p id="modal-meta" style="color:#666; font-size:0.8rem; margin-bottom:20px;"></p>
+            <div id="modal-content" style="color:#222; white-space:pre-wrap; font-family:serif;"></div>
+            <button onclick="closeReport()" class="btn-primary" style="margin-top:30px; width:100%;">FERMER</button>
         </div>
     </div>
 
