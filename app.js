@@ -1,175 +1,164 @@
-// CONFIGURATION
-const CLIENT_ID = '1499435168585220187'; 
+// --- CONFIGURATION ---
+const CLIENT_ID = '1499435168585220187';
 const REDIRECT_URI = window.location.href.split('#')[0];
-const ADMIN_IDS = ['1443517241147523223']; // <--- METS TON ID ICI (ex: '28123456789')
+const ADMIN_IDS = ['1443517241147523223']; // <--- IMPORTANT : METS TON ID ICI
 
-// ÉTAT GLOBAL
+// --- VARIABLES D'ÉTAT ---
 let discordUser = JSON.parse(localStorage.getItem('fbi_discord_user')) || null;
-let citizenDB = JSON.parse(localStorage.getItem('fbi_db')) || {};
 let activeAgents = JSON.parse(localStorage.getItem('fbi_agents')) || [];
+let citizenDB = JSON.parse(localStorage.getItem('fbi_db')) || {};
+let reportsDB = JSON.parse(localStorage.getItem('fbi_reports')) || [];
 
 // --- AUTHENTIFICATION ---
-
 function redirectToDiscord() {
     const authUrl = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=identify`;
     window.location.href = authUrl;
 }
 
-async function handleDiscordAuth() {
+async function handleAuth() {
     const fragment = new URLSearchParams(window.location.hash.slice(1));
     const token = fragment.get('access_token');
 
     if (token) {
         try {
-            const resp = await fetch('https://discord.com/api/users/@me', {
+            const res = await fetch('https://discord.com/api/users/@me', {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            const data = await resp.json();
-            
-            discordUser = {
-                id: data.id,
-                name: data.username,
-                avatar: `https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png`
-            };
-            
+            const data = await res.json();
+            discordUser = { id: data.id, name: data.username, avatar: `https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png` };
             localStorage.setItem('fbi_discord_user', JSON.stringify(discordUser));
-            window.location.hash = ""; 
-        } catch (e) {
-            console.error("Auth Error:", e);
-        }
+            window.location.hash = "";
+        } catch (e) { console.error(e); }
     }
-    checkAccess();
+    initUI();
 }
 
-function checkAccess() {
-    const lock = document.getElementById('auth-lock');
-    const app = document.getElementById('main-app');
-
+function initUI() {
     if (discordUser) {
-        lock.classList.add('hidden');
-        app.classList.remove('blur');
+        document.getElementById('auth-lock').classList.add('hidden');
+        document.getElementById('main-app').classList.remove('blur');
         document.getElementById('user-avatar').src = discordUser.avatar;
         document.getElementById('user-tag').innerText = discordUser.name.toUpperCase();
-        renderServicePanel();
+        
+        // Vérif Admin
+        if (ADMIN_IDS.includes(discordUser.id)) {
+            document.getElementById('admin-nav-section').classList.remove('hidden');
+        }
+        
+        renderAgents();
+        renderReports();
     }
 }
 
-function logout() {
-    localStorage.clear();
+// --- GESTION DES RAPPORTS ---
+function submitFullReport() {
+    const title = document.getElementById('report-title').value.trim();
+    const status = document.getElementById('report-status').value;
+    const content = document.getElementById('report-content').value.trim();
+
+    if (!title || !content) return alert("Veuillez remplir le titre et le contenu.");
+
+    // 1. Sauvegarde dans les archives citoyens
+    citizenDB[title] = { status, crimes: content };
+    localStorage.setItem('fbi_db', JSON.stringify(citizenDB));
+
+    // 2. Envoi du rapport à l'admin
+    const report = {
+        id: Date.now(),
+        title: title,
+        agent: discordUser.name,
+        date: new Date().toLocaleString('fr-FR'),
+        content: content
+    };
+    reportsDB.push(report);
+    localStorage.setItem('fbi_reports', JSON.stringify(reportsDB));
+
+    alert("Rapport transmis et archivé.");
     location.reload();
 }
 
-// --- BASE DE DONNÉES ---
+function renderReports() {
+    const container = document.getElementById('admin-reports-list');
+    if (!container) return;
 
-function searchCitizen() {
-    const val = document.getElementById('search-input').value.trim();
-    const res = document.getElementById('search-result');
-    if (!val) return;
-
-    const foundKey = Object.keys(citizenDB).find(k => k.toLowerCase() === val.toLowerCase());
-
-    if (foundKey) {
-        const d = citizenDB[foundKey];
-        const statusColor = d.status === 'RECHERCHÉ' ? '#ff4d4d' : '#27ae60';
-        res.innerHTML = `
-            <div class="result-card">
-                <div style="color:${statusColor}; font-weight:bold; margin-bottom:5px;">● ${d.status}</div>
-                <h2 style="text-transform:uppercase; font-size:1.8rem;">${foundKey}</h2>
-                <hr style="margin:15px 0; opacity:0.1;">
-                <p style="font-family:serif; font-style:italic; line-height:1.5;">"${d.crimes}"</p>
-                <button onclick="deleteCitizen('${foundKey}')" style="margin-top:20px; color:red; background:none; border:none; cursor:pointer; font-size:0.7rem;">[ EFFACER LE DOSSIER ]</button>
-            </div>`;
-    } else {
-        res.innerHTML = `<p style="color:var(--red); margin-top:20px;">⚠️ INDIVIDU NON RÉPERTORIÉ DANS LE DISTRICT.</p>`;
-    }
+    container.innerHTML = reportsDB.map(r => `
+        <div class="report-item" onclick="openReport(${r.id})">
+            <div>
+                <div style="font-weight:bold; font-size:0.8rem;">${r.title}</div>
+                <div style="font-size:0.65rem; color:var(--text-dim)">Par: ${r.agent}</div>
+            </div>
+            <button onclick="deleteReport(event, ${r.id})" class="revoke-btn">[ ARCHIVER ]</button>
+        </div>
+    `).reverse().join('');
 }
 
-function createCitizen() {
-    const name = document.getElementById('new-name').value.trim();
-    const status = document.getElementById('new-status').value;
-    const crimes = document.getElementById('new-crimes').value.trim();
-
-    if (!name) return alert("Nom requis.");
-
-    citizenDB[name] = { status, crimes: crimes || "Aucun antécédent majeur." };
-    localStorage.setItem('fbi_db', JSON.stringify(citizenDB));
-    
-    alert("Entrée validée.");
-    document.getElementById('new-name').value = "";
-    document.getElementById('new-crimes').value = "";
+function openReport(id) {
+    const r = reportsDB.find(rep => rep.id === id);
+    document.getElementById('modal-title').innerText = r.title;
+    document.getElementById('modal-meta').innerText = `AGENT : ${r.agent} | DATE : ${r.date}`;
+    document.getElementById('modal-content').innerText = r.content;
+    document.getElementById('report-modal').classList.remove('hidden');
 }
 
-function deleteCitizen(name) {
-    if (confirm(`Supprimer le dossier de ${name} ?`)) {
-        delete citizenDB[name];
-        localStorage.setItem('fbi_db', JSON.stringify(citizenDB));
-        document.getElementById('search-result').innerHTML = "";
-    }
+function closeReport() { document.getElementById('report-modal').classList.add('hidden'); }
+
+function deleteReport(e, id) {
+    e.stopPropagation();
+    reportsDB = reportsDB.filter(r => r.id !== id);
+    localStorage.setItem('fbi_reports', JSON.stringify(reportsDB));
+    renderReports();
 }
 
-// --- GESTION AGENTS (ADMIN) ---
+// --- GESTION AGENTS ---
+function addAgent() {
+    const name = document.getElementById('adm-name').value;
+    const badge = document.getElementById('adm-badge').value;
+    if (!name || !badge) return;
 
-function renderServicePanel() {
-    const panel = document.getElementById('unit-management');
-    const isAdmin = ADMIN_IDS.includes(discordUser.id);
-
-    if (isAdmin) {
-        panel.innerHTML = `
-            <div class="admin-tool">
-                <h3 style="color:var(--gold); margin-bottom:10px; font-size:0.8rem; letter-spacing:1px;">PANEL DE COMMANDEMENT</h3>
-                <div style="display:flex; gap:10px;">
-                    <input type="text" id="adm-agent-name" placeholder="Nom de l'agent" style="margin:0;">
-                    <input type="text" id="adm-badge-id" placeholder="Matricule" style="margin:0;">
-                    <button onclick="addAgentAdmin()" class="primary-btn">AFFECTER</button>
-                </div>
-            </div>`;
-    } else {
-        panel.innerHTML = `<p style="color:var(--text-dim); text-align:center;">CONSULTATION DES UNITÉS EN MISSION</p>`;
-    }
-    renderAgentsList();
-}
-
-function addAgentAdmin() {
-    const name = document.getElementById('adm-agent-name').value.trim();
-    const badge = document.getElementById('adm-badge-id').value.trim();
-    
-    if (!name || !badge) return alert("Veuillez remplir tous les champs.");
-
-    const newAgent = { 
-        id: Date.now(), 
-        name: name, 
-        badge: badge 
-    };
-
-    activeAgents.push(newAgent);
+    activeAgents.push({ id: Date.now(), name, badge });
     localStorage.setItem('fbi_agents', JSON.stringify(activeAgents));
-    renderServicePanel();
+    renderAgents();
 }
 
 function removeAgent(id) {
-    if (confirm("Révoquer cette unité ?")) {
-        activeAgents = activeAgents.filter(a => a.id !== id);
-        localStorage.setItem('fbi_agents', JSON.stringify(activeAgents));
-        renderAgentsList();
-    }
+    activeAgents = activeAgents.filter(a => a.id !== id);
+    localStorage.setItem('fbi_agents', JSON.stringify(activeAgents));
+    renderAgents();
 }
 
-function renderAgentsList() {
-    const list = document.getElementById('agents-list');
+function renderAgents() {
+    const listPublic = document.getElementById('public-agents-list');
+    const listAdmin = document.getElementById('admin-agents-list');
     const isAdmin = ADMIN_IDS.includes(discordUser.id);
 
-    list.innerHTML = activeAgents.map(a => `
-        <div class="glass-card" style="margin-top:10px; display:flex; justify-content:space-between; align-items:center;">
-            <div>
-                <span style="color:var(--gold); font-weight:bold;">[${a.badge}]</span> 
-                <span style="margin-left:10px; text-transform:uppercase;">${a.name}</span>
-            </div>
-            ${isAdmin ? `<button onclick="removeAgent(${a.id})" class="revoke-btn">[ RÉVOQUER ]</button>` : ''}
+    const html = activeAgents.map(a => `
+        <div class="report-item" style="cursor:default">
+            <span><b style="color:var(--gold)">[${a.badge}]</b> ${a.name}</span>
+            ${isAdmin ? `<button onclick="removeAgent(${a.id})" class="revoke-btn">RÉVOQUER</button>` : ''}
         </div>
     `).join('');
+
+    if (listPublic) listPublic.innerHTML = html;
+    if (listAdmin) listAdmin.innerHTML = html;
 }
 
-// --- NAVIGATION ---
+// --- RECHERCHE ---
+function searchCitizen() {
+    const val = document.getElementById('search-input').value.toLowerCase();
+    const res = document.getElementById('search-result');
+    const key = Object.keys(citizenDB).find(k => k.toLowerCase() === val);
+
+    if (key) {
+        const d = citizenDB[key];
+        res.innerHTML = `<div class="glass-card" style="margin-top:20px; background:white; color:black;">
+            <h3 style="color:red">● ${d.status}</h3>
+            <h2>${key}</h2>
+            <p style="margin-top:10px; font-style:italic;">${d.crimes}</p>
+        </div>`;
+    } else { res.innerHTML = "<p>Aucun dossier.</p>"; }
+}
+
+// --- NAV & CLOCK ---
 document.querySelectorAll('.nav-item').forEach(btn => {
     btn.onclick = () => {
         document.querySelectorAll('.nav-item, .tab-pane').forEach(el => el.classList.remove('active'));
@@ -178,9 +167,9 @@ document.querySelectorAll('.nav-item').forEach(btn => {
     };
 });
 
+function logout() { localStorage.clear(); location.reload(); }
+
 window.onload = () => {
-    handleDiscordAuth();
-    setInterval(() => {
-        document.getElementById('clock').innerText = new Date().toLocaleTimeString('fr-FR');
-    }, 1000);
+    handleAuth();
+    setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
 };
