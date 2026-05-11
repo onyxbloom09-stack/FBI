@@ -1,5 +1,5 @@
 // CONFIGURATION
-const CLIENT_ID = 'VOTRE_CLIENT_ID'; // <--- REMPLACE ICI
+const CLIENT_ID = '1499435168585220187'; // <--- REMPLACE ICI
 const REDIRECT_URI = window.location.href.split('#')[0];
 
 // ÉTAT GLOBAL
