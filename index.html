@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FBI | Sensity Federal System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="scanline"></div>
+    <div class="noise"></div>
+
+    <!-- ÉCRAN DE VERROUILLAGE (LOGIN) -->
+    <div id="auth-lock" class="auth-overlay">
+        <div class="lock-card">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/d/da/Seal_of_the_Federal_Bureau_of_Investigation.svg" alt="FBI" class="fbi-seal-auth">
+            <h2>CENTRAL INTELLIGENCE</h2>
+            <p>Accès restreint aux unités du district de Sensity.<br>Identification Discord requise.</p>
+            
+            <button class="discord-btn-auth" onclick="redirectToDiscord()">
+                <img src="https://cdn-icons-png.flaticon.com/512/2111/2111370.png" alt="Discord">
+                S'IDENTIFIER VIA DISCORD
+            </button>
+            
+            <div class="auth-footer">SENSITY GOVERNMENTAL SYSTEM © 2026</div>
+        </div>
+    </div>
+
+    <!-- TERMINAL PRINCIPAL -->
+    <div class="app-wrapper blur" id="main-app">
+        <aside class="sidebar">
+            <div class="fbi-header">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/d/da/Seal_of_the_Federal_Bureau_of_Investigation.svg" alt="FBI" class="main-logo">
+                <div class="header-text">
+                    <h1>FEDERAL BUREAU</h1>
+                    <p class="sub-logo">SENSITY DISTRICT</p>
+                </div>
+            </div>
+
+            <div class="auth-section">
+                <div id="user-profile" class="user-profile">
+                    <img id="user-avatar" src="" alt="Avatar">
+                    <div class="user-info">
+                        <span id="user-tag">Agent</span>
+                        <button onclick="logout()" class="logout-link">FIN DE SESSION</button>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="menu">
+                <div class="nav-label">BASE DE DONNÉES</div>
+                <button class="nav-item active" data-tab="search-tab">🔍 CONSULTATION</button>
+                <button class="nav-item" data-tab="admin-tab">📂 GESTION ARCHIVES</button>
+                <div class="nav-label">OPÉRATIONS</div>
+                <button class="nav-item" data-tab="agents-tab">👤 UNITÉS ACTIVES</button>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div id="clock">00:00:00</div>
+                <div class="status-indicator">● ACCÈS SÉCURISÉ</div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <!-- ONGLET RECHERCHE -->
+            <section id="search-tab" class="tab-pane active">
+                <h2 class="title">RECHERCHE CITOYENNE</h2>
+                <div class="search-box">
+                    <input type="text" id="search-input" placeholder="Entrez le nom complet...">
+                    <button class="primary-btn" onclick="searchCitizen()">INTERROGER</button>
+                </div>
+                <div id="search-result"></div>
+            </section>
+
+            <!-- ONGLET ADMIN -->
+            <section id="admin-tab" class="tab-pane">
+                <h2 class="title">CRÉATION DE DOSSIER</h2>
+                <div class="glass-card">
+                    <div class="form-row">
+                        <input type="text" id="new-name" placeholder="Nom Complet">
+                        <select id="new-status" class="fbi-select">
+                            <option value="LIBRE">🟢 LIBRE</option>
+                            <option value="SOUS SURVEILLANCE">🟡 SURVEILLANCE</option>
+                            <option value="RECHERCHÉ">🔴 RECHERCHÉ</option>
+                        </select>
+                    </div>
+                    <textarea id="new-crimes" placeholder="Historique judiciaire..." rows="5"></textarea>
+                    <button onclick="createCitizen()" class="primary-btn">VALIDER L'ENREGISTREMENT</button>
+                </div>
+            </section>
+
+            <!-- ONGLET UNITÉS -->
+            <section id="agents-tab" class="tab-pane">
+                <h2 class="title">UNITÉS EN SERVICE</h2>
+                <div id="unit-management" class="glass-card">
+                    <!-- Généré par JS -->
+                </div>
+                <div id="agents-list" class="agents-grid"></div>
+            </section>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
