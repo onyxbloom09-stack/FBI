@@ -5,17 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FBI | Sensity Federal System</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Icône de l'onglet -->
+    <link rel="icon" type="image/png" href="assets/fbi_logo.png">
 </head>
 <body>
     <div class="scanline"></div>
     <div class="noise"></div>
 
-    <!-- ÉCRAN DE VERROUILLAGE (LOGIN) -->
+    <!-- ÉCRAN DE VERROUILLAGE -->
     <div id="auth-lock" class="auth-overlay">
         <div class="lock-card">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/d/da/Seal_of_the_Federal_Bureau_of_Investigation.svg" alt="FBI" class="fbi-seal-auth">
+            <img src="assets/fbi_logo.png" alt="FBI" class="fbi-seal-auth">
             <h2>CENTRAL INTELLIGENCE</h2>
-            <p>Accès restreint aux unités du district de Sensity.<br>Identification Discord requise.</p>
+            <p>Identification Discord requise pour accéder au district de Sensity.</p>
             
             <button class="discord-btn-auth" onclick="redirectToDiscord()">
                 <img src="https://cdn-icons-png.flaticon.com/512/2111/2111370.png" alt="Discord">
@@ -30,7 +32,7 @@
     <div class="app-wrapper blur" id="main-app">
         <aside class="sidebar">
             <div class="fbi-header">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/d/da/Seal_of_the_Federal_Bureau_of_Investigation.svg" alt="FBI" class="main-logo">
+                <img src="assets/fbi_logo.png" alt="FBI" class="main-logo">
                 <div class="header-text">
                     <h1>FEDERAL BUREAU</h1>
                     <p class="sub-logo">SENSITY DISTRICT</p>
@@ -41,7 +43,7 @@
                 <div id="user-profile" class="user-profile">
                     <img id="user-avatar" src="" alt="Avatar">
                     <div class="user-info">
-                        <span id="user-tag">Agent</span>
+                        <span id="user-tag">AGENT</span>
                         <button onclick="logout()" class="logout-link">FIN DE SESSION</button>
                     </div>
                 </div>
@@ -62,7 +64,6 @@
         </aside>
 
         <main class="main-content">
-            <!-- ONGLET RECHERCHE -->
             <section id="search-tab" class="tab-pane active">
                 <h2 class="title">RECHERCHE CITOYENNE</h2>
                 <div class="search-box">
@@ -72,13 +73,12 @@
                 <div id="search-result"></div>
             </section>
 
-            <!-- ONGLET ADMIN -->
             <section id="admin-tab" class="tab-pane">
                 <h2 class="title">CRÉATION DE DOSSIER</h2>
                 <div class="glass-card">
-                    <div class="form-row">
+                    <div style="display: flex; gap: 10px;">
                         <input type="text" id="new-name" placeholder="Nom Complet">
-                        <select id="new-status" class="fbi-select">
+                        <select id="new-status" class="fbi-select" style="width: 200px;">
                             <option value="LIBRE">🟢 LIBRE</option>
                             <option value="SOUS SURVEILLANCE">🟡 SURVEILLANCE</option>
                             <option value="RECHERCHÉ">🔴 RECHERCHÉ</option>
@@ -89,13 +89,10 @@
                 </div>
             </section>
 
-            <!-- ONGLET UNITÉS -->
             <section id="agents-tab" class="tab-pane">
                 <h2 class="title">UNITÉS EN SERVICE</h2>
-                <div id="unit-management" class="glass-card">
-                    <!-- Généré par JS -->
-                </div>
-                <div id="agents-list" class="agents-grid"></div>
+                <div id="unit-management" class="glass-card"></div>
+                <div id="agents-list" class="agents-grid" style="margin-top: 20px;"></div>
             </section>
         </main>
     </div>
