@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FBI | Sensity Federal System</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Icône de l'onglet -->
-    <link rel="icon" type="image/png" href="assets/fbi_logo.png">
 </head>
 <body>
     <div class="scanline"></div>
@@ -16,15 +14,11 @@
     <div id="auth-lock" class="auth-overlay">
         <div class="lock-card">
             <img src="assets/fbi_logo.png" alt="FBI" class="fbi-seal-auth">
-            <h2>CENTRAL INTELLIGENCE</h2>
-            <p>Identification Discord requise pour accéder au district de Sensity.</p>
-            
+            <h2>FEDERAL BUREAU</h2>
+            <p>Accès restreint au district de Sensity.</p>
             <button class="discord-btn-auth" onclick="redirectToDiscord()">
-                <img src="https://cdn-icons-png.flaticon.com/512/2111/2111370.png" alt="Discord">
-                S'IDENTIFIER VIA DISCORD
+                CONNEXION DISCORD
             </button>
-            
-            <div class="auth-footer">SENSITY GOVERNMENTAL SYSTEM © 2026</div>
         </div>
     </div>
 
@@ -33,68 +27,105 @@
         <aside class="sidebar">
             <div class="fbi-header">
                 <img src="assets/fbi_logo.png" alt="FBI" class="main-logo">
-                <div class="header-text">
-                    <h1>FEDERAL BUREAU</h1>
-                    <p class="sub-logo">SENSITY DISTRICT</p>
+                <div>
+                    <h1>FBI</h1>
+                    <p style="font-size:0.6rem; color:var(--gold)">SENSITY UNIT</p>
                 </div>
             </div>
 
-            <div class="auth-section">
-                <div id="user-profile" class="user-profile">
-                    <img id="user-avatar" src="" alt="Avatar">
-                    <div class="user-info">
-                        <span id="user-tag">AGENT</span>
-                        <button onclick="logout()" class="logout-link">FIN DE SESSION</button>
-                    </div>
+            <div class="user-profile">
+                <img id="user-avatar" src="" alt="">
+                <div class="user-info">
+                    <span id="user-tag">AGENT</span>
+                    <button onclick="logout()" class="logout-link">DÉCONNEXION</button>
                 </div>
             </div>
 
-            <nav class="menu">
+            <nav>
                 <div class="nav-label">BASE DE DONNÉES</div>
-                <button class="nav-item active" data-tab="search-tab">🔍 CONSULTATION</button>
-                <button class="nav-item" data-tab="admin-tab">📂 GESTION ARCHIVES</button>
+                <button class="nav-item active" data-tab="search-tab">🔍 RECHERCHE</button>
+                <button class="nav-item" data-tab="create-tab">📂 NOUVEAU DOSSIER</button>
+                
                 <div class="nav-label">OPÉRATIONS</div>
-                <button class="nav-item" data-tab="agents-tab">👤 UNITÉS ACTIVES</button>
+                <button class="nav-item" data-tab="units-tab">👤 UNITÉS ACTIVES</button>
+                
+                <!-- ONGLET ADMIN (Caché par défaut) -->
+                <div id="admin-nav-section" class="hidden">
+                    <div class="nav-label">COMMANDEMENT</div>
+                    <button class="nav-item admin-btn" data-tab="admin-tab">⚙️ PANEL ADMIN</button>
+                </div>
             </nav>
             
             <div class="sidebar-footer">
                 <div id="clock">00:00:00</div>
-                <div class="status-indicator">● ACCÈS SÉCURISÉ</div>
             </div>
         </aside>
 
         <main class="main-content">
+            <!-- RECHERCHE -->
             <section id="search-tab" class="tab-pane active">
-                <h2 class="title">RECHERCHE CITOYENNE</h2>
+                <h2 class="title">CONSULTATION CRIMINELLE</h2>
                 <div class="search-box">
-                    <input type="text" id="search-input" placeholder="Entrez le nom complet...">
+                    <input type="text" id="search-input" placeholder="Nom du suspect...">
                     <button class="primary-btn" onclick="searchCitizen()">INTERROGER</button>
                 </div>
                 <div id="search-result"></div>
             </section>
 
-            <section id="admin-tab" class="tab-pane">
-                <h2 class="title">CRÉATION DE DOSSIER</h2>
+            <!-- CRÉATION / RAPPORT -->
+            <section id="create-tab" class="tab-pane">
+                <h2 class="title">RÉDACTION DE RAPPORT</h2>
                 <div class="glass-card">
-                    <div style="display: flex; gap: 10px;">
-                        <input type="text" id="new-name" placeholder="Nom Complet">
-                        <select id="new-status" class="fbi-select" style="width: 200px;">
-                            <option value="LIBRE">🟢 LIBRE</option>
-                            <option value="SOUS SURVEILLANCE">🟡 SURVEILLANCE</option>
-                            <option value="RECHERCHÉ">🔴 RECHERCHÉ</option>
-                        </select>
-                    </div>
-                    <textarea id="new-crimes" placeholder="Historique judiciaire..." rows="5"></textarea>
-                    <button onclick="createCitizen()" class="primary-btn">VALIDER L'ENREGISTREMENT</button>
+                    <input type="text" id="report-title" placeholder="Objet du rapport (ex: Fusillade Sensity)">
+                    <select id="report-status" class="fbi-select">
+                        <option value="LIBRE">🟢 LIBRE</option>
+                        <option value="SURVEILLANCE">🟡 SURVEILLANCE</option>
+                        <option value="RECHERCHÉ">🔴 RECHERCHÉ</option>
+                    </select>
+                    <textarea id="report-content" placeholder="Détails de l'incident ou casier..." rows="8"></textarea>
+                    <button onclick="submitFullReport()" class="primary-btn">TRANSMETTRE LE RAPPORT</button>
                 </div>
             </section>
 
-            <section id="agents-tab" class="tab-pane">
-                <h2 class="title">UNITÉS EN SERVICE</h2>
-                <div id="unit-management" class="glass-card"></div>
-                <div id="agents-list" class="agents-grid" style="margin-top: 20px;"></div>
+            <!-- UNITÉS -->
+            <section id="units-tab" class="tab-pane">
+                <h2 class="title">UNITÉS EN MISSION</h2>
+                <div id="public-agents-list"></div>
+            </section>
+
+            <!-- PANEL ADMIN -->
+            <section id="admin-tab" class="tab-pane">
+                <h2 class="title">CENTRE DE COMMANDEMENT</h2>
+                
+                <!-- Gestion des agents -->
+                <div class="glass-card admin-box">
+                    <h3 class="admin-subtitle">AFFECTATION DES AGENTS</h3>
+                    <div style="display:flex; gap:10px; margin-bottom:15px;">
+                        <input type="text" id="adm-name" placeholder="Nom">
+                        <input type="text" id="adm-badge" placeholder="Matricule">
+                        <button onclick="addAgent()" class="primary-btn">OK</button>
+                    </div>
+                    <div id="admin-agents-list"></div>
+                </div>
+
+                <!-- Inbox des rapports -->
+                <div class="glass-card admin-box" style="margin-top:20px;">
+                    <h3 class="admin-subtitle">DOCUMENTS REÇUS</h3>
+                    <div id="admin-reports-list" class="reports-container"></div>
+                </div>
             </section>
         </main>
+    </div>
+
+    <!-- MODAL LECTURE RAPPORT -->
+    <div id="report-modal" class="modal-overlay hidden">
+        <div class="modal-card">
+            <h2 id="modal-title"></h2>
+            <p id="modal-meta"></p>
+            <hr>
+            <div id="modal-content"></div>
+            <button onclick="closeReport()" class="primary-btn" style="width:100%; margin-top:20px;">RETOUR</button>
+        </div>
     </div>
 
     <script src="app.js"></script>
