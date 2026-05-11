@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FBI | Sensity Federal System</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/png" href="assets/fbi_logo.png">
 </head>
 <body>
     <div class="scanline"></div>
@@ -14,12 +15,18 @@
         <div class="lock-card">
             <img src="assets/fbi_logo.png" alt="FBI" class="fbi-seal-auth">
             <h2>CENTRAL INTELLIGENCE</h2>
-            <p>Accès restreint - District de Sensity</p>
-            <button class="discord-btn" onclick="redirectToDiscord()">AUTHENTIFICATION DISCORD</button>
+            <p>Accès restreint aux unités du district de Sensity.<br>Identification requise.</p>
+            
+            <button class="discord-btn" onclick="redirectToDiscord()">
+                <img src="https://cdn-icons-png.flaticon.com/512/2111/2111370.png" alt="Discord">
+                CONNEXION VIA DISCORD
+            </button>
+            
+            <div class="auth-footer">GOUVERNEMENT FEDERAL - SECTION 402-B</div>
         </div>
     </div>
 
-    <div class="app-container blur" id="main-app">
+    <div class="app-wrapper blur" id="main-app">
         
         <aside class="sidebar">
             <div class="brand">
@@ -31,7 +38,7 @@
             </div>
 
             <div class="agent-profile">
-                <img id="user-avatar" src="" alt="Avatar">
+                <img id="user-avatar" src="" alt="Avatar Agent">
                 <div class="agent-info">
                     <span id="user-tag">CHARGEMENT...</span>
                     <button onclick="logout()" class="logout-btn">DÉCONNEXION</button>
@@ -54,7 +61,7 @@
 
             <div class="sidebar-footer">
                 <div id="clock">00:00:00</div>
-                <div class="status">ENCRYPTÉ : AES-256</div>
+                <div class="status-indicator">● SYSTÈME SÉCURISÉ</div>
             </div>
         </aside>
 
@@ -63,9 +70,10 @@
             <section id="tab-search" class="tab-pane active">
                 <div class="page-header">
                     <h2>CONSULTATION DES ARCHIVES</h2>
+                    <p>Interrogation de la base de données centrale du district.</p>
                 </div>
                 <div class="search-box">
-                    <input type="text" id="search-input" placeholder="Saisir un nom de citoyen...">
+                    <input type="text" id="search-input" placeholder="Saisir le nom complet...">
                     <button class="btn-primary" onclick="searchCitizen()">INTERROGER</button>
                 </div>
                 <div id="search-result"></div>
@@ -73,18 +81,19 @@
 
             <section id="tab-create" class="tab-pane">
                 <div class="page-header">
-                    <h2>ENREGISTREMENT JUDICIAIRE</h2>
+                    <h2>NOUVEL ENREGISTREMENT JUDICIAIRE</h2>
+                    <p>Création d'un dossier citoyen ou d'un rapport d'incident.</p>
                 </div>
                 <div class="glass-card">
                     <div class="form-row">
-                        <input type="text" id="target-name" placeholder="Nom Complet">
+                        <input type="text" id="target-name" placeholder="Nom Complet du Citoyen">
                         <select id="target-status">
                             <option value="LIBRE">🟢 LIBRE</option>
-                            <option value="SURVEILLANCE">🟡 SURVEILLANCE</option>
+                            <option value="SURVEILLANCE">🟡 SOUS SURVEILLANCE</option>
                             <option value="RECHERCHÉ">🔴 RECHERCHÉ</option>
                         </select>
                     </div>
-                    <textarea id="target-details" placeholder="Antécédents et faits reprochés..." rows="10"></textarea>
+                    <textarea id="target-details" placeholder="Détails du dossier, antécédents, faits reprochés..." rows="10"></textarea>
                     <button class="btn-primary full" onclick="saveCitizen()">ARCHIVER LE DOSSIER</button>
                 </div>
             </section>
@@ -92,6 +101,7 @@
             <section id="tab-units" class="tab-pane">
                 <div class="page-header">
                     <h2>UNITÉS SUR LE TERRAIN</h2>
+                    <p>Liste des agents actuellement en mission dans le district.</p>
                 </div>
                 <div id="public-units-list" class="grid-list"></div>
             </section>
@@ -99,24 +109,36 @@
             <section id="tab-admin" class="tab-pane">
                 <div class="page-header">
                     <h2>PANEL DE COMMANDEMENT</h2>
+                    <p>Contrôle des affectations et des rapports d'activité.</p>
                 </div>
                 <div class="admin-grid">
                     <div class="glass-card">
-                        <h3>AFFECTATION AGENTS</h3>
+                        <h3>GESTION DES EFFECTIFS</h3>
                         <div class="form-row">
-                            <input type="text" id="adm-name" placeholder="Nom">
+                            <input type="text" id="adm-name" placeholder="Nom Agent">
                             <input type="text" id="adm-badge" placeholder="Badge">
                             <button class="btn-primary" onclick="addAgent()">AFFECTER</button>
                         </div>
                         <div id="admin-agents-list" class="scroll-list"></div>
                     </div>
                     <div class="glass-card">
-                        <h3>RAPPORTS RÉCENTS</h3>
+                        <h3>FLUX DES RAPPORTS REÇUS</h3>
                         <div id="admin-reports-list" class="scroll-list"></div>
                     </div>
                 </div>
             </section>
+
         </main>
+    </div>
+
+    <div id="report-modal" class="modal-overlay hidden">
+        <div class="modal-card">
+            <h2 id="modal-title">TITRE DU DOCUMENT</h2>
+            <p id="modal-meta">META</p>
+            <hr style="opacity: 0.1; margin: 20px 0;">
+            <div id="modal-content" class="paper-body"></div>
+            <button onclick="closeModal()" class="btn-primary" style="width:100%; margin-top:30px;">RETOUR AU TERMINAL</button>
+        </div>
     </div>
 
     <script src="app.js"></script>
