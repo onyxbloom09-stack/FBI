@@ -9,13 +9,13 @@
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
 body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
 
-/* --- SYSTÈME D'ONGLETS (CORRIGÉ) --- */
+/* --- SYSTÈME D'ONGLETS (FIXÉ) --- */
 .tab-pane {
     display: none !important; /* Cache tout par défaut */
 }
 
 .tab-pane.active {
-    display: block !important; /* Affiche seulement l'actif */
+    display: block !important; /* Affiche uniquement l'actif */
     animation: fadeIn 0.3s ease-out;
 }
 
@@ -24,25 +24,32 @@ body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidde
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* --- MISE EN PAGE --- */
-.app-wrapper { display: flex; height: 100vh; }
-.app-wrapper.blur { filter: blur(20px); }
+/* --- STRUCTURE --- */
+.app-container { display: flex; height: 100vh; }
+.app-container.blur { filter: blur(25px); }
 
-.sidebar { width: 280px; background: var(--side); border-right: 1px solid rgba(255,255,255,0.05); padding: 25px; display: flex; flex-direction: column; justify-content: space-between; }
-.main-content { flex: 1; padding: 40px; overflow-y: auto; background: radial-gradient(circle at top, #0a1424, #050a12); }
+.sidebar { width: 300px; background: var(--side); border-right: 1px solid rgba(255,255,255,0.05); padding: 30px; display: flex; flex-direction: column; }
+.content-area { flex: 1; padding: 50px; overflow-y: auto; background: radial-gradient(circle at top, #0d1b2a, #050a12); }
 
-.section-title { font-size: 1.2rem; letter-spacing: 2px; border-left: 4px solid var(--gold); padding-left: 15px; margin-bottom: 30px; color: var(--text); }
+/* --- ÉLÉMENTS UI --- */
+.brand { display: flex; align-items: center; gap: 15px; margin-bottom: 40px; }
+.brand img { width: 50px; }
+.brand-text h1 { font-size: 1.1rem; color: var(--gold); letter-spacing: 2px; }
 
-/* --- COMPOSANTS --- */
-.glass-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 4px; margin-bottom: 20px; }
-input, select, textarea { background: rgba(0,0,0,0.3); border: 1px solid #333; color: white; padding: 12px; border-radius: 4px; width: 100%; margin-bottom: 10px; }
-.btn-primary { background: var(--gold); color: black; border: none; padding: 12px 20px; font-weight: bold; cursor: pointer; border-radius: 4px; }
+.agent-profile { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 4px; margin-bottom: 30px; }
+#user-avatar { width: 45px; height: 45px; border-radius: 50%; border: 1px solid var(--gold); }
 
-/* --- NAVIGATION --- */
-.nav-item { width: 100%; text-align: left; background: none; border: none; color: var(--dim); padding: 12px; cursor: pointer; border-radius: 4px; margin-bottom: 5px; }
-.nav-item.active { background: rgba(197, 160, 89, 0.1); color: var(--gold); border-left: 3px solid var(--gold); }
+.nav-link { width: 100%; background: none; border: none; color: var(--dim); padding: 12px; text-align: left; cursor: pointer; border-radius: 4px; margin-bottom: 5px; }
+.nav-link.active { background: rgba(197, 160, 89, 0.1); color: var(--gold); border-left: 3px solid var(--gold); }
 
-/* --- MODAL --- */
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 9999; display: flex; align-items: center; justify-content: center; }
-.document-paper { background: #fff; color: #000; padding: 40px; width: 600px; max-height: 90vh; overflow-y: auto; }
+.glass-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 25px; border-radius: 4px; }
+.form-row { display: flex; gap: 15px; margin-bottom: 15px; }
+input, select, textarea { background: rgba(0,0,0,0.3); border: 1px solid #333; color: white; padding: 12px; border-radius: 4px; width: 100%; }
+
+.btn-primary { background: var(--gold); color: black; border: none; padding: 12px 25px; font-weight: bold; border-radius: 4px; cursor: pointer; }
+.btn-primary.full { width: 100%; margin-top: 10px; }
+
+/* AUTH */
+.auth-overlay { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+.discord-btn { background: #5865F2; color: white; border: none; padding: 15px 30px; border-radius: 4px; font-weight: bold; cursor: pointer; }
 .hidden { display: none !important; }
