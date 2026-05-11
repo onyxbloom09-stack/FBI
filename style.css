@@ -7,10 +7,11 @@
     --red: #ff4d4d;
 }
 
+/* BASE */
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
 body { background: var(--fbi-blue); color: var(--text-main); height: 100vh; overflow: hidden; }
 
-/* EFFETS VISUELS */
+/* AMBIANCE */
 .scanline { position: fixed; inset: 0; background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.1) 50%); z-index: 1000; background-size: 100% 3px; pointer-events: none; opacity: 0.2; }
 .noise { position: fixed; inset: 0; background: url('https://grainy-gradients.vercel.app/noise.svg'); opacity: 0.04; z-index: 1001; pointer-events: none; }
 
@@ -19,7 +20,8 @@ body { background: var(--fbi-blue); color: var(--text-main); height: 100vh; over
 .lock-card { background: rgba(0,0,0,0.5); padding: 50px; border: 1px solid var(--gold); text-align: center; max-width: 450px; border-radius: 4px; }
 .fbi-seal-auth { width: 120px; margin-bottom: 20px; filter: drop-shadow(0 0 10px var(--gold)); }
 
-.discord-btn-auth { background: var(--discord); color: white; border: none; padding: 15px; border-radius: 4px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; }
+.discord-btn-auth { background: var(--discord); color: white; border: none; padding: 15px; border-radius: 4px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; transition: 0.3s; }
+.discord-btn-auth:hover { background: #4752c4; }
 .discord-btn-auth img { width: 20px; filter: brightness(0) invert(1); }
 
 /* LAYOUT */
@@ -29,23 +31,34 @@ body { background: var(--fbi-blue); color: var(--text-main); height: 100vh; over
 .sidebar { width: 280px; background: #071221; border-right: 1px solid rgba(197, 160, 89, 0.3); padding: 20px; display: flex; flex-direction: column; }
 .main-logo { width: 45px; height: 45px; margin-right: 12px; }
 .fbi-header { display: flex; align-items: center; margin-bottom: 30px; }
-.fbi-header h1 { font-size: 1.2rem; letter-spacing: 1px; }
+.fbi-header h1 { font-size: 1.1rem; letter-spacing: 1px; color: var(--gold); }
 
-.user-profile { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.03); padding: 10px; border-radius: 4px; border: 1px solid rgba(197, 160, 89, 0.1); }
-#user-avatar { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--gold); }
+.user-profile { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.03); padding: 10px; border-radius: 4px; border: 1px solid rgba(197, 160, 89, 0.1); margin-bottom: 20px; }
+#user-avatar { width: 35px; height: 35px; border-radius: 50%; border: 1px solid var(--gold); }
+.user-info span { display: block; font-size: 0.75rem; font-weight: bold; }
+.logout-link { background: none; border: none; color: var(--red); font-size: 0.65rem; cursor: pointer; text-decoration: underline; }
 
-.nav-item { width: 100%; background: none; border: none; color: var(--text-dim); padding: 12px; text-align: left; cursor: pointer; margin-top: 5px; }
+.nav-item { width: 100%; background: none; border: none; color: var(--text-dim); padding: 12px; text-align: left; cursor: pointer; margin-top: 5px; border-radius: 4px; transition: 0.2s; }
 .nav-item.active { background: rgba(197, 160, 89, 0.1); color: var(--gold); border-left: 3px solid var(--gold); }
+.nav-label { font-size: 0.6rem; color: var(--gold); opacity: 0.5; margin: 15px 0 5px 5px; letter-spacing: 1px; }
 
-.main-content { flex: 1; padding: 40px; overflow-y: auto; }
+.main-content { flex: 1; padding: 40px; overflow-y: auto; background: #05101c; }
 .tab-pane { display: none; }
-.tab-pane.active { display: block; }
+.tab-pane.active { display: block; animation: fadeIn 0.3s; }
 
 /* COMPOSANTS */
 .glass-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 4px; }
-input, textarea, .fbi-select { background: rgba(0,0,0,0.4); border: 1px solid #333; color: white; padding: 12px; width: 100%; margin-bottom: 15px; }
-.primary-btn { background: var(--gold); color: black; border: none; padding: 12px 20px; font-weight: bold; cursor: pointer; }
+input, textarea, .fbi-select { background: rgba(0,0,0,0.4); border: 1px solid #333; color: white; padding: 12px; width: 100%; margin-bottom: 15px; border-radius: 4px; }
+input:focus { border-color: var(--gold); outline: none; }
 
-.result-card { background: white; color: #111; padding: 30px; margin-top: 20px; border-top: 8px solid var(--fbi-blue); }
-.status-indicator { font-size: 0.7rem; color: var(--gold); margin-top: 10px; }
+.primary-btn { background: var(--gold); color: black; border: none; padding: 12px 20px; font-weight: bold; cursor: pointer; border-radius: 4px; }
+.primary-btn:hover { background: #d4b477; }
+
+.admin-tool { background: rgba(197, 160, 89, 0.05); border: 1px dashed var(--gold); padding: 15px; border-radius: 4px; margin-bottom: 20px; }
+.revoke-btn { background: none; border: none; color: var(--red); cursor: pointer; font-size: 0.7rem; font-weight: bold; }
+
+.result-card { background: white; color: #111; padding: 30px; margin-top: 20px; border-top: 8px solid var(--fbi-blue); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
 .hidden { display: none !important; }
+.sidebar-footer { margin-top: auto; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
