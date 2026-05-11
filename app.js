@@ -1,17 +1,63 @@
-// CONFIG
-const ADMIN_IDS = ['1443517241147523223']; 
+// --- CONFIGURATION ---
+const CLIENT_ID = '1499435168585220187';
+const REDIRECT_URI = window.location.href.split('#')[0];
+const ADMIN_IDS = ['1443517241147523223']; // REMPLACE PAR TON ID DISCORD
 
-// BASES
-let citizenDB = JSON.parse(localStorage.getItem('fbi_db')) || {};
+// --- DATA ---
+let discordUser = JSON.parse(localStorage.getItem('fbi_user')) || null;
+let citizenDB = JSON.parse(localStorage.getItem('fbi_citizens')) || {};
 let reportsDB = JSON.parse(localStorage.getItem('fbi_reports')) || [];
+let agentsList = JSON.parse(localStorage.getItem('fbi_agents')) || [];
 
-// --- NAVIGATION (FONCTIONNELLE) ---
-document.querySelectorAll('.nav-item').forEach(btn => {
+// --- 1. CONNEXION DISCORD ---
+function redirectToDiscord() {
+    const url = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=identify`;
+    window.location.href = url;
+}
+
+async function handleAuth() {
+    const params = new URLSearchParams(window.location.hash.slice(1));
+    const token = params.get('access_token');
+
+    if (token) {
+        try {
+            const res = await fetch('https://discord.com/api/users/@me', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const data = await res.json();
+            discordUser = {
+                id: data.id,
+                name: data.username,
+                avatar: `https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png`
+            };
+            localStorage.setItem('fbi_user', JSON.stringify(discordUser));
+            window.location.hash = "";
+        } catch (e) { console.error(e); }
+    }
+    initApp();
+}
+
+function initApp() {
+    if (!discordUser) return;
+    
+    document.getElementById('auth-lock').classList.add('hidden');
+    document.getElementById('main-app').classList.remove('blur');
+    document.getElementById('user-avatar').src = discordUser.avatar;
+    document.getElementById('user-tag').innerText = discordUser.name.toUpperCase();
+
+    if (ADMIN_IDS.includes(discordUser.id)) {
+        document.getElementById('admin-only').style.display = 'block';
+    }
+    renderData();
+}
+
+// --- 2. LOGIQUE DES ONGLETS ---
+document.querySelectorAll('.nav-link').forEach(btn => {
     btn.addEventListener('click', () => {
         const target = btn.getAttribute('data-tab');
-
-        // Nettoyage complet
-        document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+        
+        // Nettoyage
+        document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
 
         // Activation
@@ -20,54 +66,70 @@ document.querySelectorAll('.nav-item').forEach(btn => {
     });
 });
 
-// --- RECHERCHE ---
-function searchCitizen() {
-    const val = document.getElementById('search-input').value.trim().toLowerCase();
-    const res = document.getElementById('search-result');
-    if(!val) return;
+// --- 3. FONCTIONS ---
+function saveCitizen() {
+    const name = document.getElementById('target-name').value.trim();
+    const status = document.getElementById('target-status').value;
+    const details = document.getElementById('target-details').value.trim();
 
-    const key = Object.keys(citizenDB).find(k => k.toLowerCase() === val);
-    if(key) {
-        const d = citizenDB[key];
-        res.innerHTML = `
-            <div class="glass-card" style="margin-top:20px; border-left: 5px solid ${d.status === 'RECHERCHÉ' ? 'red' : 'green'}">
-                <small style="color:var(--gold)">STATUT: ${d.status}</small>
-                <h2 style="margin:10px 0">${key.toUpperCase()}</h2>
-                <p style="font-family:monospace; opacity:0.8">${d.crimes}</p>
-            </div>`;
-    } else {
-        res.innerHTML = `<p style="color:red; margin-top:20px;">Individu inconnu.</p>`;
-    }
-}
+    if (!name || !details) return alert("Veuillez remplir tous les champs.");
 
-// --- CREATION ---
-function submitFullReport() {
-    const title = document.getElementById('report-title').value.trim();
-    const status = document.getElementById('report-status').value;
-    const content = document.getElementById('report-content').value.trim();
+    citizenDB[name] = { status, details };
+    reportsDB.push({ id: Date.now(), name, agent: discordUser.name, date: new Date().toLocaleString() });
 
-    if(!title || !content) return alert("Champs vides.");
-
-    citizenDB[title] = { status, crimes: content };
-    reportsDB.push({ id: Date.now(), title, agent: "Agent", date: new Date().toLocaleString(), content });
-    
-    localStorage.setItem('fbi_db', JSON.stringify(citizenDB));
+    localStorage.setItem('fbi_citizens', JSON.stringify(citizenDB));
     localStorage.setItem('fbi_reports', JSON.stringify(reportsDB));
 
-    alert("Dossier créé.");
-    location.reload(); 
+    alert("Dossier archivé !");
+    document.getElementById('target-name').value = "";
+    document.getElementById('target-details').value = "";
+    renderData();
 }
 
-// Initialisation au chargement
-window.onload = () => {
-    // Vérification admin
-    const user = JSON.parse(localStorage.getItem('fbi_discord_user'));
-    if(user && ADMIN_IDS.includes(user.id)) {
-        document.getElementById('admin-nav-section').style.display = 'block';
+function searchCitizen() {
+    const query = document.getElementById('search-input').value.trim().toLowerCase();
+    const resultDiv = document.getElementById('search-result');
+    const key = Object.keys(citizenDB).find(k => k.toLowerCase() === query);
+
+    if (key) {
+        const d = citizenDB[key];
+        resultDiv.innerHTML = `
+            <div class="glass-card" style="margin-top:20px; border-left: 5px solid ${d.status === 'RECHERCHÉ' ? 'red' : 'green'}">
+                <h3>${key.toUpperCase()}</h3>
+                <p>STATUT: ${d.status}</p>
+                <p style="margin-top:10px; opacity:0.7; font-family:monospace;">${d.details}</p>
+            </div>`;
+    } else {
+        resultDiv.innerHTML = "<p style='color:red; margin-top:20px;'>Aucun dossier trouvé.</p>";
     }
+}
+
+function addAgent() {
+    const n = document.getElementById('adm-name').value;
+    const b = document.getElementById('adm-badge').value;
+    if(!n || !b) return;
+    agentsList.push({ n, b, id: Date.now() });
+    localStorage.setItem('fbi_agents', JSON.stringify(agentsList));
+    renderData();
+}
+
+function renderData() {
+    const html = agentsList.map(a => `<div class="glass-card" style="padding:10px; margin-bottom:5px;">[${a.b}] ${a.n}</div>`).join('');
+    document.getElementById('public-units-list').innerHTML = html;
+    document.getElementById('admin-agents-list').innerHTML = html;
     
-    // Horloge
-    setInterval(() => {
-        document.getElementById('clock').innerText = new Date().toLocaleTimeString();
+    document.getElementById('admin-reports-list').innerHTML = reportsDB.map(r => `
+        <div class="glass-card" style="padding:10px; margin-bottom:5px; font-size:0.8rem;">
+            <b>${r.name}</b><br>Agent: ${r.agent} | ${r.date}
+        </div>`).reverse().join('');
+}
+
+function logout() { localStorage.clear(); location.reload(); }
+
+window.onload = () => {
+    handleAuth();
+    setInterval(() => { 
+        const el = document.getElementById('clock');
+        if(el) el.innerText = new Date().toLocaleTimeString('fr-FR'); 
     }, 1000);
 };
