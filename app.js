@@ -1,12 +1,12 @@
 // CONFIGURATION
-const CLIENT_ID = '1499435168585220187'; // <-- Remplace par ton ID de Sensity
+const CLIENT_ID = '1499435168585220187'; 
 const REDIRECT_URI = window.location.href.split('#')[0];
+const ADMIN_IDS = ['1443517241147523223']; // <--- METS TON ID ICI (ex: '28123456789')
 
 // ÉTAT GLOBAL
 let discordUser = JSON.parse(localStorage.getItem('fbi_discord_user')) || null;
 let citizenDB = JSON.parse(localStorage.getItem('fbi_db')) || {};
 let activeAgents = JSON.parse(localStorage.getItem('fbi_agents')) || [];
-let currentAgent = JSON.parse(localStorage.getItem('fbi_current_agent')) || null;
 
 // --- AUTHENTIFICATION ---
 
@@ -107,52 +107,64 @@ function deleteCitizen(name) {
     }
 }
 
-// --- AGENTS ---
+// --- GESTION AGENTS (ADMIN) ---
 
 function renderServicePanel() {
     const panel = document.getElementById('unit-management');
-    if (currentAgent) {
+    const isAdmin = ADMIN_IDS.includes(discordUser.id);
+
+    if (isAdmin) {
         panel.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <p>UNITÉ EN SERVICE : <strong style="color:var(--gold)">${currentAgent.badge}</strong></p>
-                <button onclick="endService()" class="logout-link">QUITTER LE SERVICE</button>
+            <div class="admin-tool">
+                <h3 style="color:var(--gold); margin-bottom:10px; font-size:0.8rem; letter-spacing:1px;">PANEL DE COMMANDEMENT</h3>
+                <div style="display:flex; gap:10px;">
+                    <input type="text" id="adm-agent-name" placeholder="Nom de l'agent" style="margin:0;">
+                    <input type="text" id="adm-badge-id" placeholder="Matricule" style="margin:0;">
+                    <button onclick="addAgentAdmin()" class="primary-btn">AFFECTER</button>
+                </div>
             </div>`;
     } else {
-        panel.innerHTML = `
-            <div style="display:flex; gap:10px;">
-                <input type="text" id="badge-id" placeholder="Matricule (ex: S-01)" style="margin:0;">
-                <button onclick="startService()" class="primary-btn">PRISE DE SERVICE</button>
-            </div>`;
+        panel.innerHTML = `<p style="color:var(--text-dim); text-align:center;">CONSULTATION DES UNITÉS EN MISSION</p>`;
     }
     renderAgentsList();
 }
 
-function startService() {
-    const badge = document.getElementById('badge-id').value.trim();
-    if (!badge) return alert("Badge requis.");
-
-    currentAgent = { badge, name: discordUser.name, id: discordUser.id };
-    activeAgents.push(currentAgent);
+function addAgentAdmin() {
+    const name = document.getElementById('adm-agent-name').value.trim();
+    const badge = document.getElementById('adm-badge-id').value.trim();
     
-    localStorage.setItem('fbi_current_agent', JSON.stringify(currentAgent));
+    if (!name || !badge) return alert("Veuillez remplir tous les champs.");
+
+    const newAgent = { 
+        id: Date.now(), 
+        name: name, 
+        badge: badge 
+    };
+
+    activeAgents.push(newAgent);
     localStorage.setItem('fbi_agents', JSON.stringify(activeAgents));
     renderServicePanel();
 }
 
-function endService() {
-    activeAgents = activeAgents.filter(a => a.id !== discordUser.id);
-    currentAgent = null;
-    localStorage.removeItem('fbi_current_agent');
-    localStorage.setItem('fbi_agents', JSON.stringify(activeAgents));
-    renderServicePanel();
+function removeAgent(id) {
+    if (confirm("Révoquer cette unité ?")) {
+        activeAgents = activeAgents.filter(a => a.id !== id);
+        localStorage.setItem('fbi_agents', JSON.stringify(activeAgents));
+        renderAgentsList();
+    }
 }
 
 function renderAgentsList() {
     const list = document.getElementById('agents-list');
+    const isAdmin = ADMIN_IDS.includes(discordUser.id);
+
     list.innerHTML = activeAgents.map(a => `
-        <div class="glass-card" style="margin-bottom:10px; display:flex; justify-content:space-between;">
-            <span>UNITÉ ${a.badge}</span>
-            <span style="color:var(--gold)">${a.name}</span>
+        <div class="glass-card" style="margin-top:10px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <span style="color:var(--gold); font-weight:bold;">[${a.badge}]</span> 
+                <span style="margin-left:10px; text-transform:uppercase;">${a.name}</span>
+            </div>
+            ${isAdmin ? `<button onclick="removeAgent(${a.id})" class="revoke-btn">[ RÉVOQUER ]</button>` : ''}
         </div>
     `).join('');
 }
