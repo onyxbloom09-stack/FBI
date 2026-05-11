@@ -1,5 +1,5 @@
 // CONFIGURATION
-const CLIENT_ID = '1499435168585220187'; // <--- REMPLACE ICI
+const CLIENT_ID = '1499435168585220187'; // <-- Remplace par ton ID de Sensity
 const REDIRECT_URI = window.location.href.split('#')[0];
 
 // ÉTAT GLOBAL
@@ -33,7 +33,7 @@ async function handleDiscordAuth() {
             };
             
             localStorage.setItem('fbi_discord_user', JSON.stringify(discordUser));
-            window.location.hash = ""; // Nettoyer l'URL
+            window.location.hash = ""; 
         } catch (e) {
             console.error("Auth Error:", e);
         }
@@ -51,19 +51,15 @@ function checkAccess() {
         document.getElementById('user-avatar').src = discordUser.avatar;
         document.getElementById('user-tag').innerText = discordUser.name.toUpperCase();
         renderServicePanel();
-    } else {
-        lock.classList.remove('hidden');
-        app.classList.add('blur');
     }
 }
 
 function logout() {
-    localStorage.removeItem('fbi_discord_user');
-    localStorage.removeItem('fbi_current_agent');
+    localStorage.clear();
     location.reload();
 }
 
-// --- LOGIQUE BASE DE DONNÉES ---
+// --- BASE DE DONNÉES ---
 
 function searchCitizen() {
     const val = document.getElementById('search-input').value.trim();
@@ -77,14 +73,14 @@ function searchCitizen() {
         const statusColor = d.status === 'RECHERCHÉ' ? '#ff4d4d' : '#27ae60';
         res.innerHTML = `
             <div class="result-card">
-                <div style="color:${statusColor}; font-weight:bold; margin-bottom:10px;">● ${d.status}</div>
-                <h2 style="font-size:2rem; letter-spacing:-1px;">${foundKey.toUpperCase()}</h2>
-                <hr style="margin:20px 0; opacity:0.1;">
-                <p style="font-family:serif; line-height:1.6; font-style:italic;">"${d.crimes}"</p>
+                <div style="color:${statusColor}; font-weight:bold; margin-bottom:5px;">● ${d.status}</div>
+                <h2 style="text-transform:uppercase; font-size:1.8rem;">${foundKey}</h2>
+                <hr style="margin:15px 0; opacity:0.1;">
+                <p style="font-family:serif; font-style:italic; line-height:1.5;">"${d.crimes}"</p>
                 <button onclick="deleteCitizen('${foundKey}')" style="margin-top:20px; color:red; background:none; border:none; cursor:pointer; font-size:0.7rem;">[ EFFACER LE DOSSIER ]</button>
             </div>`;
     } else {
-        res.innerHTML = `<p style="color:var(--red); margin-top:20px; font-weight:bold;">⚠️ AUCUN RÉSULTAT POUR "${val.toUpperCase()}"</p>`;
+        res.innerHTML = `<p style="color:var(--red); margin-top:20px;">⚠️ INDIVIDU NON RÉPERTORIÉ DANS LE DISTRICT.</p>`;
     }
 }
 
@@ -93,39 +89,39 @@ function createCitizen() {
     const status = document.getElementById('new-status').value;
     const crimes = document.getElementById('new-crimes').value.trim();
 
-    if (!name) return alert("Veuillez entrer un nom.");
+    if (!name) return alert("Nom requis.");
 
-    citizenDB[name] = { status, crimes: crimes || "Aucun antécédent majeur répertorié." };
+    citizenDB[name] = { status, crimes: crimes || "Aucun antécédent majeur." };
     localStorage.setItem('fbi_db', JSON.stringify(citizenDB));
     
-    alert("Dossier enregistré avec succès.");
+    alert("Entrée validée.");
     document.getElementById('new-name').value = "";
     document.getElementById('new-crimes').value = "";
 }
 
 function deleteCitizen(name) {
-    if (confirm(`Confirmer la suppression du dossier ${name} ?`)) {
+    if (confirm(`Supprimer le dossier de ${name} ?`)) {
         delete citizenDB[name];
         localStorage.setItem('fbi_db', JSON.stringify(citizenDB));
-        searchCitizen();
+        document.getElementById('search-result').innerHTML = "";
     }
 }
 
-// --- GESTION DES AGENTS ---
+// --- AGENTS ---
 
 function renderServicePanel() {
     const panel = document.getElementById('unit-management');
     if (currentAgent) {
         panel.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <p>UNITÉ ACTIVE : <strong>${currentAgent.badge}</strong> (${discordUser.name})</p>
-                <button onclick="endService()" class="logout-link" style="color:var(--red)">FIN DE SERVICE</button>
+                <p>UNITÉ EN SERVICE : <strong style="color:var(--gold)">${currentAgent.badge}</strong></p>
+                <button onclick="endService()" class="logout-link">QUITTER LE SERVICE</button>
             </div>`;
     } else {
         panel.innerHTML = `
             <div style="display:flex; gap:10px;">
-                <input type="text" id="badge-id" placeholder="Matricule (ex: S-12)" style="margin:0;">
-                <button onclick="startService()" class="primary-btn">PRENDRE SERVICE</button>
+                <input type="text" id="badge-id" placeholder="Matricule (ex: S-01)" style="margin:0;">
+                <button onclick="startService()" class="primary-btn">PRISE DE SERVICE</button>
             </div>`;
     }
     renderAgentsList();
@@ -133,7 +129,7 @@ function renderServicePanel() {
 
 function startService() {
     const badge = document.getElementById('badge-id').value.trim();
-    if (!badge) return alert("Matricule requis.");
+    if (!badge) return alert("Badge requis.");
 
     currentAgent = { badge, name: discordUser.name, id: discordUser.id };
     activeAgents.push(currentAgent);
@@ -154,15 +150,14 @@ function endService() {
 function renderAgentsList() {
     const list = document.getElementById('agents-list');
     list.innerHTML = activeAgents.map(a => `
-        <div class="glass-card" style="margin-top:10px; display:flex; justify-content:space-between;">
+        <div class="glass-card" style="margin-bottom:10px; display:flex; justify-content:space-between;">
             <span>UNITÉ ${a.badge}</span>
             <span style="color:var(--gold)">${a.name}</span>
         </div>
     `).join('');
 }
 
-// --- NAVIGATION & INIT ---
-
+// --- NAVIGATION ---
 document.querySelectorAll('.nav-item').forEach(btn => {
     btn.onclick = () => {
         document.querySelectorAll('.nav-item, .tab-pane').forEach(el => el.classList.remove('active'));
