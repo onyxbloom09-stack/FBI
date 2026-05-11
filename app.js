@@ -38,92 +38,93 @@ async function handleAuth() {
             });
             const data = await res.json();
             
-            // Sécurité Avatar : Si l'utilisateur n'a pas d'avatar, on met l'image par défaut de Discord
             const avatarUrl = data.avatar 
                 ? `https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png` 
                 : `https://cdn.discordapp.com/embed/avatars/${data.discriminator % 5}.png`;
 
-            window.discordUser = { 
-                id: data.id, 
-                name: data.username, 
-                avatar: avatarUrl 
-            };
-
+            window.discordUser = { id: data.id, name: data.username, avatar: avatarUrl };
             localStorage.setItem('fbi_user', JSON.stringify(window.discordUser));
             window.location.hash = "";
             initApp();
-        } catch (error) {
-            console.error("Erreur Auth:", error);
-        }
+        } catch (error) { console.error("Erreur Auth:", error); }
     }
 }
 
 function initApp() {
-    const authLock = document.getElementById('auth-lock');
+    // 1. Gestion de l'affichage global
+    document.getElementById('auth-lock').style.display = 'none';
     const mainApp = document.getElementById('main-app');
-    
-    if (authLock) authLock.classList.add('hidden');
-    if (mainApp) mainApp.classList.remove('hidden');
-    
+    mainApp.style.display = 'flex';
+    mainApp.classList.remove('hidden');
+
+    // 2. Profil
     document.getElementById('user-avatar').src = window.discordUser.avatar;
     document.getElementById('user-tag').innerText = window.discordUser.name.toUpperCase();
     
+    // 3. Admin
     if (ADMIN_IDS.includes(window.discordUser.id)) {
-        const adminSec = document.getElementById('admin-section');
-        if (adminSec) adminSec.style.display = 'block';
+        document.getElementById('admin-section').style.display = 'block';
     }
+
+    // 4. Force l'affichage du premier onglet
+    switchTab('tab-search');
     syncData();
 }
 
-// --- FONCTIONS CLOUD ---
+function switchTab(tabId) {
+    // Masquer toutes les sections
+    document.querySelectorAll('.tab-pane').forEach(pane => {
+        pane.classList.remove('active');
+        pane.style.display = 'none';
+    });
+    // Activer la bonne
+    const target = document.getElementById(tabId);
+    if (target) {
+        target.classList.add('active');
+        target.style.display = 'block';
+    }
+}
+
+// --- LOGIQUE FIREBASE ---
 async function saveToCloud() {
     const name = document.getElementById('target-name').value.trim();
     const status = document.getElementById('target-status').value;
     const details = document.getElementById('target-details').value.trim();
-
     if(!name || !details) return alert("Champs obligatoires !");
 
-    try {
-        await setDoc(doc(db, "citizens", name.toLowerCase()), {
-            name, status, details, agent: window.discordUser.name, date: new Date().toLocaleString()
-        });
-        alert("Dossier synchronisé avec succès.");
-        document.getElementById('target-name').value = "";
-        document.getElementById('target-details').value = "";
-    } catch (e) {
-        alert("Erreur de permission : Vérifiez vos règles Firebase.");
-    }
+    await setDoc(doc(db, "citizens", name.toLowerCase()), {
+        name, status, details, agent: window.discordUser.name, date: new Date().toLocaleString()
+    });
+    alert("Dossier synchronisé.");
+    document.getElementById('target-name').value = "";
+    document.getElementById('target-details').value = "";
 }
 
 async function searchInCloud() {
     const query = document.getElementById('search-input').value.toLowerCase().trim();
     if(!query) return;
-    
     const docSnap = await getDoc(doc(db, "citizens", query));
     const result = document.getElementById('search-result');
 
     if (docSnap.exists()) {
         const d = docSnap.data();
-        result.innerHTML = `
-            <div class="glass-card" style="border-left:5px solid ${d.status === 'RECHERCHÉ' ? '#ff4d4d' : '#4dff4d'}; margin-top:20px;">
-                <h3 style="color:var(--gold)">${d.name.toUpperCase()}</h3>
-                <p style="margin: 10px 0;">${d.details}</p>
-                <small style="opacity:0.6">Agent : ${d.agent} | ${d.date}</small>
-            </div>`;
+        result.innerHTML = `<div class="glass-card" style="border-left:5px solid ${d.status === 'RECHERCHÉ' ? '#ff4d4d' : '#4dff4d'}; margin-top:20px;">
+            <h3>${d.name.toUpperCase()}</h3><p>${d.details}</p><small>Agent : ${d.agent}</small></div>`;
     } else {
-        result.innerHTML = `<p style="color:#ff4d4d; margin-top:20px;">Individu introuvable dans la base de données.</p>`;
+        result.innerHTML = `<p style="color:red; margin-top:20px;">Introuvable.</p>`;
     }
 }
 
 function syncData() {
     onSnapshot(collection(db, "citizens"), (snapshot) => {
         const list = document.getElementById('units-list');
-        if (!list) return;
-        list.innerHTML = "";
-        snapshot.forEach(doc => {
-            const d = doc.data();
-            list.innerHTML += `<div class="glass-card" style="margin-bottom:10px;"><b>${d.name}</b> - <span style="color:var(--gold)">${d.status}</span></div>`;
-        });
+        if (list) {
+            list.innerHTML = "";
+            snapshot.forEach(doc => {
+                const d = doc.data();
+                list.innerHTML += `<div class="glass-card" style="margin-bottom:10px;"><b>${d.name}</b> - ${d.status}</div>`;
+            });
+        }
     });
 }
 
@@ -134,21 +135,17 @@ document.getElementById('login-btn').onclick = () => {
 
 document.querySelectorAll('.nav-link').forEach(btn => {
     btn.onclick = () => {
-        document.querySelectorAll('.nav-link, .tab-pane').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
         btn.classList.add('active');
-        const target = document.getElementById(btn.dataset.tab);
-        if(target) target.classList.add('active');
+        switchTab(btn.dataset.tab);
     };
 });
 
 document.getElementById('save-exec').onclick = saveToCloud;
 document.getElementById('search-exec').onclick = searchInCloud;
-document.getElementById('logout-btn').onclick = () => { 
-    localStorage.clear(); 
-    location.reload(); 
-};
+document.getElementById('logout-btn').onclick = () => { localStorage.clear(); location.reload(); };
 
-setInterval(() => { 
+setInterval(() => {
     const clock = document.getElementById('clock');
-    if(clock) clock.innerText = new Date().toLocaleTimeString('fr-FR'); 
+    if(clock) clock.innerText = new Date().toLocaleTimeString('fr-FR');
 }, 1000);
