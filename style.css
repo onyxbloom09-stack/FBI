@@ -2,39 +2,59 @@
     --bg: #050a12;
     --side: #070e1a;
     --gold: #c5a059;
+    --gold-dim: rgba(197, 160, 89, 0.1);
     --text: #e6f1ff;
     --red: #ff4d4d;
+    --border: rgba(197, 160, 89, 0.3);
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
+* { 
+    box-sizing: border-box; 
+    margin: 0; 
+    padding: 0; 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+}
 
-/* --- SYSTÈME D'ONGLETS --- */
+body { 
+    background: var(--bg); 
+    color: var(--text); 
+    height: 100vh; 
+    overflow: hidden; 
+}
+
+/* --- SYSTÈME D'ONGLETS (CORRIGÉ) --- */
 .tab-pane {
-    display: none !important;
+    display: none !important; /* Force la fermeture */
 }
 
 .tab-pane.active {
-    display: block !important;
-    animation: fadeIn 0.3s ease-in;
+    display: block !important; /* Force l'ouverture */
+    animation: fadeIn 0.4s ease-out;
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; } to { opacity: 1; }
+    from { opacity: 0; transform: translateY(5px); } 
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .hidden { display: none !important; }
 
-/* --- LAYOUT --- */
-.app-container { display: flex; height: 100vh; }
+/* --- LAYOUT PRINCIPAL --- */
+.app-container { 
+    display: flex; 
+    height: 100vh; 
+    width: 100%;
+}
 
 .sidebar { 
     width: 300px; 
+    min-width: 300px;
     background: var(--side); 
-    border-right: 1px solid rgba(197, 160, 89, 0.3); 
+    border-right: 1px solid var(--border); 
     padding: 25px; 
     display: flex; 
     flex-direction: column; 
+    z-index: 10;
 }
 
 .content-area { 
@@ -44,6 +64,12 @@ body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidde
     background: radial-gradient(circle at center, #0a1422 0%, #050a12 100%);
 }
 
+/* Custom Scrollbar pour le thème FBI */
+.content-area::-webkit-scrollbar { width: 6px; }
+.content-area::-webkit-scrollbar-track { background: var(--bg); }
+.content-area::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
+
+/* --- PROFIL AGENT --- */
 .agent-profile { 
     display: flex; 
     align-items: center; 
@@ -61,9 +87,17 @@ body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidde
     border-radius: 50%; 
     border: 2px solid var(--gold);
     object-fit: cover;
+    flex-shrink: 0;
 }
 
-#user-tag { font-weight: bold; font-size: 0.9rem; color: var(--gold); }
+#user-tag { 
+    font-weight: bold; 
+    font-size: 0.9rem; 
+    color: var(--gold); 
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 
 .logout-link { 
     background: none; 
@@ -72,16 +106,19 @@ body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidde
     font-size: 0.7rem; 
     cursor: pointer; 
     text-decoration: underline; 
-    display: block;
+    display: inline-block;
     margin-top: 4px;
+    padding: 0;
 }
 
+/* --- NAVIGATION --- */
 .nav-title {
     font-size: 0.7rem;
     color: var(--gold);
     opacity: 0.5;
     margin: 20px 0 10px 5px;
-    letter-spacing: 1px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
 }
 
 .nav-link { 
@@ -92,81 +129,125 @@ body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidde
     padding: 12px; 
     text-align: left; 
     cursor: pointer; 
-    transition: 0.2s;
+    transition: all 0.3s ease;
     border-radius: 4px;
+    margin-bottom: 5px;
 }
 
-.nav-link:hover { background: rgba(255,255,255,0.05); }
+.nav-link:hover { 
+    background: rgba(255,255,255,0.05); 
+    color: var(--text);
+}
 
 .nav-link.active { 
     color: var(--gold); 
     border-left: 3px solid var(--gold); 
-    background: rgba(197, 160, 89, 0.1); 
+    background: var(--gold-dim); 
 }
 
-/* --- COMPOSANTS --- */
+/* --- ÉCRAN DE VERROUILLAGE (LOGIN) --- */
 .auth-overlay { 
     position: fixed; 
     inset: 0; 
     background: var(--bg); 
-    z-index: 9999; 
+    z-index: 10000; /* Toujours au dessus */
     display: flex; 
     align-items: center; 
     justify-content: center; 
+    padding: 20px;
 }
 
 .lock-card { 
     text-align: center; 
     border: 1px solid var(--gold); 
     padding: 50px; 
-    background: rgba(0, 0, 0, 0.8);
-    box-shadow: 0 0 30px rgba(0,0,0,0.5);
+    background: rgba(0, 0, 0, 0.9);
+    box-shadow: 0 0 50px rgba(0,0,0,0.8);
+    max-width: 450px;
+    width: 100%;
+}
+
+.fbi-seal-auth {
+    width: 120px;
+    margin-bottom: 20px;
+    filter: drop-shadow(0 0 10px var(--gold));
 }
 
 .discord-btn { 
     background: #5865F2; 
     color: white; 
     border: none; 
-    padding: 14px 28px; 
+    padding: 16px 32px; 
     border-radius: 4px; 
     cursor: pointer; 
     font-weight: bold; 
     margin-top: 25px;
-    transition: 0.3s;
+    transition: transform 0.2s, background 0.2s;
+    width: 100%;
 }
 
-.discord-btn:hover { background: #4752c4; transform: translateY(-2px); }
+.discord-btn:hover { 
+    background: #4752c4; 
+    transform: translateY(-2px); 
+}
 
+/* --- FORMULAIRES & CARTES --- */
 .glass-card { 
     background: rgba(255, 255, 255, 0.02); 
     border: 1px solid rgba(255, 255, 255, 0.08); 
     padding: 25px; 
     border-radius: 4px;
+    margin-bottom: 20px;
 }
 
 input, select, textarea { 
     width: 100%; 
     padding: 14px; 
-    background: rgba(0,0,0,0.4); 
+    background: rgba(0,0,0,0.6); 
     border: 1px solid #333; 
     color: #fff; 
     margin-bottom: 15px;
     outline: none;
+    transition: border-color 0.3s;
 }
 
-input:focus { border-color: var(--gold); }
+input:focus, textarea:focus { 
+    border-color: var(--gold); 
+}
 
 .btn-primary { 
     background: var(--gold); 
     color: #000; 
     border: none; 
-    padding: 12px 25px; 
+    padding: 14px 25px; 
     font-weight: bold; 
     cursor: pointer;
-    transition: 0.2s;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
-.btn-primary:hover { filter: brightness(1.2); }
+.btn-primary:hover { 
+    filter: brightness(1.2); 
+    box-shadow: 0 0 15px rgba(197, 160, 89, 0.4);
+}
+
 .btn-primary.full { width: 100%; }
 
-#clock { font-family: 'Courier New', Courier, monospace; font-size: 1.5rem; color: var(--gold); margin-top: auto; padding-top: 20px; }
+/* --- ÉLÉMENTS FIXES --- */
+#clock { 
+    font-family: 'Courier New', Courier, monospace; 
+    font-size: 1.6rem; 
+    color: var(--gold); 
+    margin-top: auto; 
+    padding-top: 20px;
+    text-align: center;
+    border-top: 1px solid var(--border);
+}
+
+.sidebar-footer .status {
+    font-size: 0.6rem;
+    text-align: center;
+    opacity: 0.4;
+    margin-top: 5px;
+}
