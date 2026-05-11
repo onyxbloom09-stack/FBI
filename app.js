@@ -1,5 +1,5 @@
 // CONFIGURATION
-const CLIENT_ID = ''; 
+const CLIENT_ID = '1499435168585220187'; 
 const REDIRECT_URI = window.location.href.split('#')[0];
 const ADMIN_IDS = ['1443517241147523223']; // <--- METS TON ID ICI (ex: '28123456789')
 
